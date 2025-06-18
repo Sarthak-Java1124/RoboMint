@@ -10,6 +10,7 @@ export default function Navbar(){
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     useEffect(() => {
+        console.log('Navbar mounted - initial state:', { isDialogOpen, isConnected });
         // Check if wallet is already connected
         if (typeof window !== 'undefined' && window.ethereum) {
             window.ethereum.request({ method: 'eth_accounts' })
@@ -17,6 +18,7 @@ export default function Navbar(){
                     if (accounts.length > 0) {
                         setIsConnected(true);
                         setAccount(accounts[0]);
+                        console.log('Wallet already connected:', accounts[0]);
                     }
                 })
                 .catch(console.error);
@@ -43,6 +45,16 @@ export default function Navbar(){
         setAccount(null);
     };
 
+    const openWalletDialog = () => {
+        console.log('Opening wallet dialog - user clicked Connect button');
+        setIsDialogOpen(true);
+    };
+
+    const closeWalletDialog = () => {
+        console.log('Closing wallet dialog');
+        setIsDialogOpen(false);
+    };
+
     const shortenAddress = (address: string) => {
         return `${address.slice(0, 6)}...${address.slice(-4)}`;
     };
@@ -58,7 +70,7 @@ export default function Navbar(){
                  <Link href="/faq" className="text-white font-mono font-bold text-xl px-4 hover:text-orange-400 transition-colors">FAQ</Link>
                  {!isConnected ? (
                    <motion.button
-                     onClick={() => setIsDialogOpen(true)}
+                     onClick={openWalletDialog}
                      className="bg-gradient-to-r from-orange-400 to-pink-400 text-white font-bold px-6 py-2 rounded-lg shadow-lg border-2 border-orange-300 ml-4"
                      whileHover={{ 
                        scale: 1.05, 
@@ -101,7 +113,7 @@ export default function Navbar(){
             
             <WalletDialog
               isOpen={isDialogOpen}
-              onClose={() => setIsDialogOpen(false)}
+              onClose={closeWalletDialog}
               onConnect={handleWalletConnect}
             />
         </>

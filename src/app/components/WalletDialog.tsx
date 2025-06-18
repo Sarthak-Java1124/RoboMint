@@ -20,17 +20,32 @@ export default function WalletDialog({ isOpen, onClose, onConnect }: WalletDialo
   const [isConnecting, setIsConnecting] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('WalletDialog useEffect - isOpen:', isOpen);
     if (isOpen) {
-      detectWallets();
+      console.log('WalletDialog is opening - detecting wallets');
+      // Add a small delay to ensure this only happens when dialog is explicitly opened
+      const timer = setTimeout(() => {
+        detectWallets();
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
   const detectWallets = () => {
+    console.log('detectWallets called - checking for available wallets');
     const detectedWallets: Wallet[] = [];
 
     // Check for any Ethereum provider
     if (typeof window !== 'undefined' && window.ethereum) {
       const ethereum = window.ethereum;
+      console.log('Ethereum provider found:', {
+        isMetaMask: ethereum.isMetaMask,
+        isCoinbaseWallet: ethereum.isCoinbaseWallet,
+        isTrust: ethereum.isTrust,
+        isBinanceWallet: ethereum.isBinanceWallet,
+        isPhantom: ethereum.isPhantom
+      });
 
       // MetaMask
       if (ethereum.isMetaMask) {
@@ -40,9 +55,11 @@ export default function WalletDialog({ isOpen, onClose, onConnect }: WalletDialo
           isAvailable: true,
           connect: async () => {
             try {
+              console.log('Attempting to connect to MetaMask');
               const accounts = await ethereum.request({
                 method: 'eth_requestAccounts'
               });
+              console.log('MetaMask connection successful:', accounts[0]);
               return accounts[0] || null;
             } catch (error) {
               console.error('MetaMask connection failed:', error);
